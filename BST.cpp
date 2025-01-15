@@ -4,9 +4,9 @@ using namespace std;
 template <class T>
 struct Node {
     T value;
-    Node<T>* l;
-    Node<T>* r;
-    Node(T v = T(), Node<T>* _l = nullptr, Node<T>* _r = nullptr): value(v), l(_l), r(_r) {}
+    Node<T>* left;
+    Node<T>* right;
+    Node(T v = T(), Node<T>* l = nullptr, Node<T>* r = nullptr): value(v), left(l), right(r) {}
 };
 
 template <class T>
@@ -14,52 +14,55 @@ class BST {
 private:
     Node<T>* root;
 
-    Node<T>* addNode(Node<T>* node, T value) {
-        if (!node) return new Node<T>(value);
-        if (value < node->value) {
-            node->l = addNode(node->l, value);
-        } else if (value > node->value) {
-            node->r = addNode(node->r, value);
-        }
+    Node<T>* add(Node<T>* node, T value) {
+        if (!node) return new Node(value);
+        if (value < node->value) node->left = add(node->left, value);
+        else node->right = add(node->right, value);
         return node;
     }
 
     Node<T>* findMin(Node<T>* node) {
-        while (node && node->l) {
-            node = node->l;
+        while (node && node->left) {
+            node = node->left;
         }
         return node;
     }
 
-    Node<T>* delNode(Node<T>* node, T value) {
+    Node<T>* del(Node<T>* node, T value) {
         if (!node) return node;
-        if (value < node->value) {
-            node->l = delNode(node->l, value);
-        } else if (value > node->value) {
-            node->r = delNode(node->r, value);
-        } else {
-            if (node->l == nullptr) {
-                Node<T>* tmp = node->r;
+        if (value < node->value) node->left = del(node->left, value);
+        else if (value > node->value) node->right = del(node->right, value);
+        else {
+            if (node->left == nullptr) {
+                Node<T>* tmp = node->right;
                 delete node;
                 return tmp;
-            } else if (node->r == nullptr) {
-                Node<T>* tmp = node->l;
+            } else if (node->right == nullptr) {
+                Node<T>* tmp = node->left;
                 delete node;
                 return tmp;
             }
 
-            Node<T>* tmp = findMin(node->r);
+            Node<T>* tmp = findMin(node->right);
             node->value = tmp->value;
-            node->r = delNode(node->r, tmp->value);
+            node->right = del(node->right, tmp->value);
         }
         return node;
     }
 
-    void printTree(Node<T>* node) {
+    void print(Node<T>* node) {
         if (node) {
-            printTree(node->l);
+            print(node->left);
             cout << node->value << ' ';
-            printTree(node->r);
+            print(node->right);
+        }
+    }
+
+    void clr(Node<T>* node) {
+        if (node) {
+            clr(node->left);
+            clr(node->right);
+            delete node;
         }
     }
 public:
@@ -67,28 +70,32 @@ public:
         root = nullptr;
     }
 
-    ~BST() {}
-
-    void addNode(T value) {
-        root = addNode(root, value);
+    ~BST() {
+        clr(root);
     }
 
-    void delNode(T value) {
-        root = delNode(root, value);
+    void add(T value) {
+        root = add(root, value);
     }
 
-    void printTree() {
-        printTree(root);
+    void del(T value) {
+        root = del(root, value);
+    }
+
+    void print() {
+        print(root);
     }
 };
 
-main() {
+int main() {
     BST<int> t;
-    t.addNode(3);
-    t.addNode(2);
-    t.addNode(4);
-    t.addNode(5);
-    t.addNode(1);
-    t.delNode(3);
-    t.printTree();
+    t.add(5);
+    t.add(7);
+    t.add(4);
+    t.add(6);
+    t.add(9);
+    t.add(2);
+    t.del(5);
+    t.print();
+    return 0;
 }
